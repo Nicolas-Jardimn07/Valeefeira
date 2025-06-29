@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Início
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-chart-line"></i> Analytics
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Enhanced Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2><i class="fas fa-chart-line text-primary"></i> Analytics Dashboard</h2>
+            <p class="text-muted mb-0">Acompanhe o desempenho dos seus produtos e vendas</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-box fa-2x mb-2"></i>
+                    <h3 class="mb-1">{{ total_products }}</h3>
+                    <p class="mb-0">Produtos Cadastrados</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-comments fa-2x mb-2"></i>
+                    <h3 class="mb-1">{{ total_chats }}</h3>
+                    <p class="mb-0">Conversas Totais</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h3 class="mb-1">{{ total_reviews }}</h3>
+                    <p class="mb-0">Avaliações Recebidas</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-trophy fa-2x mb-2"></i>
+                    <h3 class="mb-1">{{ "%.1f"|format(avg_rating) if avg_rating else "0.0" }}</h3>
+                    <p class="mb-0">Rating Médio</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Charts -->
+    <div class="row mb-4">
+        <!-- Products Performance -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Performance dos Produtos</h5>
+                </div>
+                <div class="card-body">
+                    {% if products_with_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Conversas</th>
+                                        <th>Avaliações</th>
+                                        <th>Rating</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product, chat_count, review_count, avg_rating in products_with_stats[:10] %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ product.name }}</strong>
+                                            <br><small class="text-muted">{{ product.category.title() }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ chat_count or 0 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ review_count or 0 }}</span>
+                                        </td>
+                                        <td>
+                                            {% if avg_rating %}
+                                                <span class="text-warning">
+                                                    {{ "★" * (avg_rating|int) }}{{ "☆" * (5 - (avg_rating|int)) }}
+                                                    <small>({{ "%.1f"|format(avg_rating) }})</small>
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">Sem avaliações</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if chat_count and chat_count > 5 %}
+                                                <span class="badge bg-success">Popular</span>
+                                            {% elif chat_count and chat_count > 0 %}
+                                                <span class="badge bg-info">Ativo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Novo</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-bar text-muted fa-3x mb-3"></i>
+                            <p class="text-muted">Nenhum dado de performance disponível ainda.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Stats -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    {% if category_stats %}
+                        {% set max_chats = category_stats|map(attribute='chat_count')|max or 1 %}
+                        {% for stat in category_stats %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold">{{ stat.category.title() }}</span>
+                                <small class="text-muted">{{ stat.product_count }} produtos</small>
+                            </div>
+                            <div class="progress mb-1" style="height: 8px;">
+                                <div class="progress-bar bg-primary" 
+                                     style="width: {{ (stat.chat_count / max_chats * 100)|int if max_chats > 0 else 0 }}%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">{{ stat.chat_count }} conversas</small>
+                                {% if stat.avg_rating %}
+                                    <small class="text-warning">★ {{ "%.1f"|format(stat.avg_rating) }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-pie text-muted fa-3x mb-3"></i>
+                            <p class="text-muted">Nenhuma categoria com dados ainda.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends Chart -->
+    {% if monthly_chats %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Tendência de Conversas (Últimos 6 Meses)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Insights and Recommendations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Insights e Recomendações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">📈 Produtos em Destaque</h6>
+                            {% if products_with_stats %}
+                                {% set top_product = products_with_stats[0] %}
+                                <p class="mb-3">
+                                    <strong>{{ top_product[0].name }}</strong> é seu produto mais popular com 
+                                    <span class="text-success">{{ top_product[1] or 0 }} conversas</span>.
+                                    {% if top_product[1] and top_product[1] > 10 %}
+                                        Continue promovendo produtos similares!
+                                    {% endif %}
+                                </p>
+                            {% else %}
+                                <p class="text-muted mb-3">Adicione mais produtos para ver insights detalhados.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-info">💡 Dicas de Melhoria</h6>
+                            {% if total_products < 5 %}
+                                <p class="mb-3">Considere adicionar mais produtos para aumentar suas vendas e alcance no marketplace.</p>
+                            {% elif total_chats < total_products %}
+                                <p class="mb-3">Melhore as descrições e fotos dos seus produtos para atrair mais interessados.</p>
+                            {% elif avg_rating and avg_rating < 4.0 %}
+                                <p class="mb-3">Foque em melhorar a qualidade do atendimento para aumentar suas avaliações.</p>
+                            {% else %}
+                                <p class="mb-3">Excelente trabalho! Continue mantendo a qualidade dos seus produtos e atendimento.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for Monthly Trends -->
+{% if monthly_chats %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const monthData = {{ monthly_chats|tojson }};
+    
+    if (monthData && monthData.length > 0) {
+        const ctx = document.getElementById('monthlyTrendsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthData.map(item => item.month),
+                datasets: [{
+                    label: 'Conversas',
+                    data: monthData.map(item => item.count),
+                    borderColor: '#20a39e',
+                    backgroundColor: 'rgba(32, 163, 158, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-home"></i> Início
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ url_for('products') }}">
+                    <i class="fas fa-shopping-basket"></i> Produtos
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="fas fa-tag"></i> {{ product.name }}
+            </li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Product Image -->
+        <div class="col-lg-6 mb-4">
+            {% if product.image_data %}
+                <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                     class="img-fluid rounded shadow" alt="{{ product.name }}" style="width: 100%; max-height: 500px; object-fit: cover;">
+            {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center rounded shadow" style="height: 400px;">
+                    <i class="fas fa-image fa-5x text-muted"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h1 class="card-title mb-3">{{ product.name }}</h1>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">{{ product.category.title() }}</span>
+                        {% if product.is_organic %}
+                            <span class="badge bg-success me-2">
+                                <i class="fas fa-leaf"></i> Orgânico
+                            </span>
+                        {% endif %}
+                        {% if product.is_active %}
+                            <span class="badge bg-success">Disponível</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Indisponível</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="price-info mb-4">
+                        <h2 class="text-success mb-1">{{ product.price|currency }}</h2>
+                        <span class="text-muted">por {{ product.unit }}</span>
+                    </div>
+                    
+                    <div class="availability-info mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-box text-muted me-2"></i>
+                            <span>
+                                <strong>{{ product.quantity_available }}</strong> {{ product.unit }}(s) disponível(is)
+                            </span>
+                        </div>
+                        {% if product.harvest_date %}
+                            <div class="d-flex align-items-center mt-2">
+                                <i class="fas fa-calendar text-muted me-2"></i>
+                                <span>Colhido em: <strong>{{ product.harvest_date.strftime('%d/%m/%Y') }}</strong></span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="description mb-4">
+                        <h5>Descrição</h5>
+                        <p class="text-muted">{{ product.description }}</p>
+                    </div>
+                    
+                    <!-- Contact Producer -->
+                    <div class="contact-info">
+                        <h5>Informações do Produtor</h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-user-circle fa-2x text-muted me-3"></i>
+                                    <div>
+                                        <h6 class="mb-0">{{ product.seller.username }}</h6>
+                                        <small class="text-muted">{{ product.seller.user_type.title() }}</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="contact-details">
+                                    <div class="mb-2">
+                                        <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                        <span>{{ product.seller.city }}, Vale do Jequitinhonha</span>
+                                    </div>
+                                    
+                                    {% if product.seller.phone %}
+                                        <div class="mb-2">
+                                            <i class="fas fa-phone text-muted me-2"></i>
+                                            <a href="tel:{{ product.seller.phone }}" class="text-decoration-none">{{ product.seller.phone }}</a>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <i class="fas fa-envelope text-muted me-2"></i>
+                                        <a href="mailto:{{ product.seller.email }}" class="text-decoration-none">{{ product.seller.email }}</a>
+                                    </div>
+                                    
+                                    {% if product.seller.description %}
+                                        <div class="mb-3">
+                                            <small class="text-muted">{{ product.seller.description[:150] }}{% if product.seller.description|length > 150 %}...{% endif %}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    {% if current_user.is_authenticated and current_user.id != product.seller.id %}
+                                        <div class="row g-2 mb-2">
+                                            <div class="col-8">
+                                                <a href="{{ url_for('chat', product_id=product.id, other_user_id=product.seller.id) }}" class="btn btn-primary w-100">
+                                                    <i class="fas fa-comment"></i> Conversar
+                                                </a>
+                                            </div>
+                                            <div class="col-4">
+                                                <form method="post" action="{{ url_for('toggle_favorite', product_id=product.id) }}" class="d-inline w-100">
+                                                    {% if product.is_favorited_by(current_user.id) %}
+                                                        <button type="submit" class="btn btn-danger w-100" title="Remover dos favoritos">
+                                                            <i class="fas fa-heart"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <button type="submit" class="btn btn-outline-danger w-100" title="Adicionar aos favoritos">
+                                                            <i class="far fa-heart"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if product.seller.phone %}
+                                        <a href="https://wa.me/55{{ product.seller.phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}?text=Olá! Vi seu produto '{{ product.name }}' no Vale%26feira e gostaria de saber mais informações." 
+                                           class="btn btn-success" target="_blank">
+                                            <i class="fab fa-whatsapp"></i> Conversar no WhatsApp
+                                        </a>
+                                    {% endif %}
+                                    
+                                    <a href="{{ url_for('profile', user_id=product.seller.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-user"></i> Ver Perfil do Produtor
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit/Delete Actions for Owner -->
+    {% if current_user.is_authenticated and current_user.id == product.seller_id %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog"></i> Gerenciar Produto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Este é seu produto. Você pode editá-lo ou excluí-lo.</p>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('edit_product', id=product.id) }}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Editar Produto
+                            </a>
+                            <a href="{{ url_for('delete_product', id=product.id) }}" class="btn btn-danger"
+                               onclick="return confirm('Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.')">
+                                <i class="fas fa-trash"></i> Excluir Produto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Product Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star text-warning"></i> Avaliações do Produto
+                    </h5>
+                    {% if current_user.is_authenticated and product.can_be_reviewed_by(current_user.id) %}
+                        <a href="{{ url_for('add_review', product_id=product.id) }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-star"></i> Avaliar
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <!-- Rating Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="text-center p-3 bg-light rounded">
+                                <div class="h4 mb-2">{{ product.get_average_rating() }}/5</div>
+                                <div class="text-warning mb-2">{{ product.get_star_display() }}</div>
+                                <small class="text-muted">{{ product.get_rating_count() }} avaliações</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6 class="mb-2">Avaliações do Vendedor</h6>
+                                <div class="h5 mb-1">{{ product.seller.get_average_rating() }}/5</div>
+                                <div class="text-warning mb-2">{{ product.seller.get_star_display() }}</div>
+                                <small class="text-muted">{{ product.seller.get_rating_count() }} avaliações</small>
+                                <div class="mt-2">
+                                    <a href="{{ url_for('seller_reviews', seller_id=product.seller.id) }}" class="btn btn-outline-primary btn-sm">
+                                        Ver todas
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Reviews -->
+                    {% set recent_reviews = product.reviews[:3] %}
+                    {% if recent_reviews %}
+                        <h6 class="mb-3">Avaliações Recentes</h6>
+                        {% for review in recent_reviews %}
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong class="me-3">{{ review.reviewer.username }}</strong>
+                                            <span class="text-warning me-2">{{ review.get_star_display() }}</span>
+                                            <small class="text-muted">{{ review.created_at.strftime('%d/%m/%Y') }}</small>
+                                        </div>
+                                        
+                                        {% if review.title %}
+                                            <h6 class="fw-bold mb-2">{{ review.title }}</h6>
+                                        {% endif %}
+                                        
+                                        {% if review.comment %}
+                                            <p class="mb-0">{{ review.comment }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if product.get_rating_count() > 3 %}
+                            <div class="text-center">
+                                <a href="{{ url_for('product_reviews', product_id=product.id) }}" class="btn btn-outline-primary">
+                                    Ver todas as {{ product.get_rating_count() }} avaliações
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-star fa-2x text-muted mb-3"></i>
+                            <h6>Nenhuma avaliação ainda</h6>
+                            <p class="text-muted mb-3">Seja o primeiro a avaliar este produto!</p>
+                            {% if current_user.is_authenticated and product.can_be_reviewed_by(current_user.id) %}
+                                <a href="{{ url_for('add_review', product_id=product.id) }}" class="btn btn-success">
+                                    <i class="fas fa-star"></i> Avaliar Produto
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Related Products -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Outros produtos desta categoria</h3>
+            <hr>
+            <!-- This would be a query for related products -->
+            <div class="text-center py-4">
+                <a href="{{ url_for('products', category=product.category) }}" class="btn btn-outline-success">
+                    <i class="fas fa-shopping-basket"></i> Ver mais produtos de {{ product.category.title() }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.price-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid #28a745;
+}
+
+.contact-info .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.availability-info {
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}

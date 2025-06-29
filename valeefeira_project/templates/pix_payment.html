@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento PIX - Plano {{ plan_details.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fas fa-qrcode"></i> Pagamento via PIX</h3>
+                    <p class="mb-0">Plano {{ plan_details.name }} - R$ {{ "%.2f"|format(plan_details.price) }}</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Order Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Resumo do Pedido</h5>
+                            <div class="bg-light p-3 rounded">
+                                <div class="d-flex justify-content-between">
+                                    <span>Plano {{ plan_details.name }}</span>
+                                    <strong>R$ {{ "%.2f"|format(plan_details.price) }}</strong>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between">
+                                    <span>Período</span>
+                                    <span>30 dias</span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total</strong>
+                                    <strong class="text-success">R$ {{ "%.2f"|format(plan_details.price) }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Benefícios do Plano</h5>
+                            <div class="bg-light p-3 rounded">
+                                {% if plan == 'basic' %}
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="fas fa-check text-success"></i> 3 produtos em destaque</li>
+                                        <li><i class="fas fa-check text-success"></i> Badge "Produtor Verificado"</li>
+                                        <li><i class="fas fa-check text-success"></i> Prioridade nas buscas</li>
+                                        <li><i class="fas fa-check text-success"></i> Analytics básicos</li>
+                                    </ul>
+                                {% else %}
+                                    <ul class="list-unstyled mb-0">
+                                        <li><i class="fas fa-check text-success"></i> 10 produtos em destaque</li>
+                                        <li><i class="fas fa-check text-success"></i> Badge "Produtor Premium"</li>
+                                        <li><i class="fas fa-check text-success"></i> Destaque na página inicial</li>
+                                        <li><i class="fas fa-check text-success"></i> Analytics avançados</li>
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- PIX Payment Instructions -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-mobile-alt"></i> Como pagar com PIX</h5>
+                            <div class="step-instructions">
+                                <div class="step mb-3">
+                                    <div class="d-flex">
+                                        <span class="badge bg-primary rounded-circle me-3">1</span>
+                                        <div>
+                                            <strong>Abra o app do seu banco</strong>
+                                            <p class="text-muted mb-0">Acesse a área PIX do seu banco ou carteira digital</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="step mb-3">
+                                    <div class="d-flex">
+                                        <span class="badge bg-primary rounded-circle me-3">2</span>
+                                        <div>
+                                            <strong>Escaneie o QR Code</strong>
+                                            <p class="text-muted mb-0">Use a câmera do app para escanear o código ao lado</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="step mb-3">
+                                    <div class="d-flex">
+                                        <span class="badge bg-primary rounded-circle me-3">3</span>
+                                        <div>
+                                            <strong>Confirme o pagamento</strong>
+                                            <p class="text-muted mb-0">Verifique os dados e confirme a transação</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-qrcode"></i> QR Code PIX</h5>
+                            <div class="text-center">
+                                <!-- QR Code placeholder - in production, use a real QR code generator -->
+                                <div class="qr-code-container bg-white border p-3 rounded mb-3" style="display: inline-block;">
+                                    <div class="qr-code-placeholder bg-dark" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-qrcode text-white fa-5x"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> Código válido por 30 minutos
+                                    </small>
+                                </div>
+                                
+                                <!-- PIX Code for copy -->
+                                <div class="mb-3">
+                                    <label class="form-label small">Ou copie o código PIX:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control form-control-sm" 
+                                               value="{{ pix_code[:50] }}..." 
+                                               id="pixCode" readonly>
+                                        <button class="btn btn-outline-secondary btn-sm" 
+                                                onclick="copyPixCode()" type="button">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Status -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <div class="spinner-border spinner-border-sm me-3" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div>
+                                        <strong>Aguardando pagamento...</strong>
+                                        <p class="mb-0">Assim que o pagamento for confirmado, seu plano será ativado automaticamente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('subscription_plans') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left"></i> Voltar aos Planos
+                                </a>
+                                
+                                <form method="POST" action="{{ url_for('confirm_pix_payment') }}" class="d-inline">
+                                    <input type="hidden" name="plan" value="{{ plan }}">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Confirmar Pagamento (Simulação)
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Security Info -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-shield-alt text-success"></i> Pagamento Seguro</h6>
+                                    <p class="mb-0 small">
+                                        Seus dados estão protegidos. O PIX é uma forma de pagamento instantânea e segura 
+                                        regulamentada pelo Banco Central do Brasil.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyPixCode() {
+    const pixCodeInput = document.getElementById('pixCode');
+    const fullCode = "{{ pix_code }}";
+    
+    navigator.clipboard.writeText(fullCode).then(function() {
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(function() {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+// Simulate payment status check (in production, this would be real-time)
+setTimeout(function() {
+    const alert = document.querySelector('.alert-info');
+    if (alert) {
+        alert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-clock text-warning me-3 fa-lg"></i>
+                <div>
+                    <strong>Aguardando confirmação...</strong>
+                    <p class="mb-0">O pagamento pode levar alguns segundos para ser processado.</p>
+                </div>
+            </div>
+        `;
+    }
+}, 5000);
+</script>
+
+<style>
+.step-instructions .step {
+    padding-left: 0;
+}
+
+.step-instructions .badge {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.qr-code-container {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.qr-code-placeholder {
+    background: repeating-linear-gradient(
+        45deg,
+        #000,
+        #000 10px,
+        #333 10px,
+        #333 20px
+    );
+}
+</style>
+{% endblock %}

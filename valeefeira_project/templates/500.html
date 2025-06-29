@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Erro Interno - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="card shadow">
+                <div class="card-body py-5">
+                    <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+                    <h1 class="h2 mb-3">Ops! Algo deu errado</h1>
+                    <p class="text-muted mb-4">
+                        Encontramos um erro interno no sistema. Nossa equipe foi notificada e está trabalhando para resolver o problema.
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-success">
+                            <i class="fas fa-home"></i> Voltar ao Início
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Página Anterior
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Início</a></li>
+            <li class="breadcrumb-item active">Perfil de {{ user.username }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- User Profile -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <div class="profile-avatar mb-3">
+                        {% if user.profile_image_data %}
+                            <img src="{{ url_for('serve_profile_image', user_id=user.id) }}" 
+                                 alt="Foto de {{ user.username }}" class="rounded-circle img-thumbnail" 
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 120px; height: 120px;">
+                                <i class="fas fa-user fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="card-title">{{ user.username }}</h3>
+                    
+                    <div class="mb-3">
+                        {% if user.user_type == 'produtor' %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-seedling"></i> Produtor
+                            </span>
+                        {% else %}
+                            <span class="badge bg-primary fs-6">
+                                <i class="fas fa-shopping-cart"></i> Comprador
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="contact-info text-start">
+                        <div class="mb-2">
+                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                            <span>{{ user.city }}, Vale do Jequitinhonha</span>
+                        </div>
+                        
+                        {% if user.phone %}
+                            <div class="mb-2">
+                                <i class="fas fa-phone text-muted me-2"></i>
+                                <a href="tel:{{ user.phone }}" class="text-decoration-none">{{ user.phone }}</a>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-2">
+                            <i class="fas fa-envelope text-muted me-2"></i>
+                            <a href="mailto:{{ user.email }}" class="text-decoration-none">{{ user.email }}</a>
+                        </div>
+                        
+                        {% if user.address %}
+                            <div class="mb-2">
+                                <i class="fas fa-home text-muted me-2"></i>
+                                <span class="small">{{ user.address }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-2">
+                            <i class="fas fa-calendar text-muted me-2"></i>
+                            <span class="small">Membro desde {{ user.created_at.strftime('%m/%Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if user.description %}
+                        <div class="mt-3">
+                            <h6>Sobre</h6>
+                            <p class="text-muted small">{{ user.description }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Contact Actions -->
+                    {% if current_user != user %}
+                        <div class="d-grid gap-2 mt-3">
+                            {% if user.phone %}
+                                <a href="https://wa.me/55{{ user.phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}?text=Olá! Vi seu perfil no Vale%26feira e gostaria de conversar." 
+                                   class="btn btn-success" target="_blank">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                            {% endif %}
+                            
+                            <a href="mailto:{{ user.email }}" class="btn btn-outline-primary">
+                                <i class="fas fa-envelope"></i> Enviar Email
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Edit Profile Button for Own Profile -->
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                                <i class="fas fa-user-edit"></i> Editar Perfil
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Content -->
+        <div class="col-lg-8">
+            {% if user.user_type == 'produtor' %}
+                <!-- Producer's Products -->
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-box"></i> Produtos de {{ user.full_name }}
+                            {% if products %}
+                                <span class="badge bg-secondary">{{ products|length }}</span>
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        {% if products %}
+                            <div class="row">
+                                {% for product in products %}
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            {% if product.image_data %}
+                                                <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                                     class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="card-body d-flex flex-column">
+                                                <h5 class="card-title">{{ product.name }}</h5>
+                                                
+                                                <div class="mb-2">
+                                                    <span class="badge bg-light text-dark">{{ product.category.title() }}</span>
+                                                    {% if product.is_organic %}
+                                                        <span class="badge bg-success">Orgânico</span>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <p class="card-text">{{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}</p>
+                                                
+                                                <div class="mt-auto">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span class="h6 text-success mb-0">{{ product.price|currency }}/{{ product.unit }}</span>
+                                                        <small class="text-muted">{{ product.quantity_available }} disponível</small>
+                                                    </div>
+                                                    
+                                                    <div class="d-grid gap-2">
+                                                        <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-outline-success">
+                                                            <i class="fas fa-eye"></i> Ver Detalhes
+                                                        </a>
+                                                        
+                                                        {% if current_user != user and user.phone %}
+                                                            <a href="https://wa.me/55{{ user.phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}?text=Olá! Vi seu produto '{{ product.name }}' no Vale%26feira e gostaria de saber mais informações." 
+                                                               class="btn btn-success btn-sm" target="_blank">
+                                                                <i class="fab fa-whatsapp"></i> Interessado
+                                                            </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if product.harvest_date %}
+                                                <div class="card-footer bg-light">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar"></i> Colhido em: {{ product.harvest_date.strftime('%d/%m/%Y') }}
+                                                    </small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-box fa-4x text-muted mb-3"></i>
+                                <h5>Nenhum produto cadastrado</h5>
+                                <p class="text-muted">
+                                    {% if current_user == user %}
+                                        Você ainda não cadastrou nenhum produto.
+                                    {% else %}
+                                        Este produtor ainda não cadastrou produtos.
+                                    {% endif %}
+                                </p>
+                                {% if current_user == user %}
+                                    <a href="{{ url_for('add_product') }}" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Adicionar Primeiro Produto
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <!-- Buyer Profile -->
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-user"></i> Perfil do Comprador
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Informações</h5>
+                                <p class="text-muted">
+                                    {{ user.full_name }} é um comprador registrado no Vale&feira, 
+                                    interessado em produtos frescos e artesanais da região do Vale do Jequitinhonha.
+                                </p>
+                                
+                                {% if user.description %}
+                                    <h6>Sobre</h6>
+                                    <p class="text-muted">{{ user.description }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>Localização</h5>
+                                <p>
+                                    <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                    {{ user.city }}, Vale do Jequitinhonha
+                                </p>
+                                
+                                <h6>Membro desde</h6>
+                                <p>{{ user.created_at.strftime('%B de %Y') }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if current_user != user %}
+                            <hr>
+                            <div class="text-center">
+                                <h6>Interessado em vender para {{ user.full_name.split()[0] }}?</h6>
+                                <p class="text-muted">Entre em contato para ofercer seus produtos!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Suggest Products -->
+                <div class="card shadow mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-basket"></i> Produtos que podem interessar
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted">Explore os produtos disponíveis na região!</p>
+                        <a href="{{ url_for('products') }}" class="btn btn-success">
+                            <i class="fas fa-search"></i> Ver Todos os Produtos
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.profile-avatar {
+    margin-bottom: 1rem;
+}
+
+.contact-info {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

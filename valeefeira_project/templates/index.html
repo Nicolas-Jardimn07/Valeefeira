@@ -1,0 +1,554 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+/* Slogan Visual Enhancements */
+.slogan-highlight {
+    animation: sloganPulse 3s ease-in-out infinite;
+    border: 3px solid rgba(255, 193, 7, 0.3);
+    background: linear-gradient(135deg, #ffc107 0%, #ffdb4d 100%);
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.slogan-highlight:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+@keyframes sloganPulse {
+    0%, 100% { 
+        border-color: rgba(255, 193, 7, 0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    50% { 
+        border-color: rgba(255, 193, 7, 0.6);
+        box-shadow: 0 6px 20px rgba(255, 193, 7, 0.2);
+    }
+}
+
+.slogan-line-1 {
+    animation: slideInLeft 1s ease-out;
+    color: #2c5530;
+}
+
+.slogan-line-2 {
+    animation: slideInRight 1s ease-out 0.3s both;
+    color: #2c5530;
+}
+
+.highlight-word {
+    position: relative;
+    font-weight: 700;
+    color: #155724;
+}
+
+.highlight-word:first-child {
+    animation: highlightAccess 2s ease-in-out 1.5s both;
+}
+
+.highlight-word:last-child {
+    animation: highlightWaste 2s ease-in-out 2s both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes highlightAccess {
+    0%, 100% { color: #155724; }
+    50% { 
+        color: #28a745;
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        transform: scale(1.05);
+    }
+}
+
+@keyframes highlightWaste {
+    0%, 100% { color: #155724; }
+    50% { 
+        color: #dc3545;
+        text-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+        transform: scale(1.05);
+    }
+}
+
+.slogan-decoration {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+    border-radius: 2px;
+    animation: decorationGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes decorationGlow {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* Value Proposition Icons */
+.value-icon {
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+.value-icon:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.value-icon:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Mobile Responsive */
+/* Impact Section Styles */
+.impact-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.impact-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(40, 167, 69, 0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+}
+
+.progress-sm {
+    height: 4px;
+}
+
+.counter {
+    font-weight: 700;
+    font-size: 2.5rem;
+}
+
+.impact-icon {
+    animation: impactPulse 2s ease-in-out infinite;
+}
+
+@keyframes impactPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.value-badge {
+    animation: badgeFloat 3s ease-in-out infinite;
+}
+
+.value-badge:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+@keyframes badgeFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-5px) rotate(5deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .slogan-container {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    .slogan-line-1 {
+        font-size: 1.3rem !important;
+    }
+    
+    .slogan-line-2 {
+        font-size: 1.1rem !important;
+    }
+    
+    .counter {
+        font-size: 2rem !important;
+    }
+    
+    .impact-card {
+        margin-bottom: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-success text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">Vale&feira</h1>
+                <div class="slogan-container bg-warning text-dark px-4 py-4 rounded-3 mb-4 position-relative shadow-lg slogan-highlight">
+                    <div class="slogan-icon position-absolute top-0 start-0 mt-2 ms-2">
+                        <i class="fas fa-quote-left fa-2x opacity-25"></i>
+                    </div>
+                    <div class="slogan-content">
+                        <h3 class="fw-bold mb-2 text-center slogan-line-1">Do Vale para o mercado:</h3>
+                        <h4 class="text-center mb-0 slogan-line-2">
+                            <span class="highlight-word">mais acesso</span>, 
+                            <span class="highlight-word">menos desperdício</span>.
+                        </h4>
+                    </div>
+                    <div class="slogan-icon position-absolute bottom-0 end-0 mb-2 me-2">
+                        <i class="fas fa-quote-right fa-2x opacity-25"></i>
+                    </div>
+                    <div class="slogan-decoration"></div>
+                </div>
+                <!-- Value Proposition Visual -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="value-point d-flex align-items-center text-white">
+                            <div class="value-icon me-3 bg-warning rounded-circle p-3">
+                                <i class="fas fa-route fa-2x text-dark"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Mais Acesso</h5>
+                                <p class="mb-0 small opacity-75">Conectando produtores diretamente aos compradores</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="value-point d-flex align-items-center text-white">
+                            <div class="value-icon me-3 bg-warning rounded-circle p-3">
+                                <i class="fas fa-recycle fa-2x text-dark"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Menos Desperdício</h5>
+                                <p class="mb-0 small opacity-75">Reduzindo intermediários e perdas na cadeia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="lead mb-4 opacity-90">
+                    Uma plataforma digital inovadora para produtos frescos, orgânicos e artesanais 
+                    do Vale do Jequitinhonha.
+                </p>
+                <div class="d-flex gap-3">
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus"></i> Cadastre-se
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('products') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-shopping-basket"></i> Ver Produtos
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-container position-relative">
+                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                         alt="Produtos do campo" class="img-fluid rounded shadow">
+                    <div class="tech-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                        <div class="tech-circuit" style="opacity: 0.2;">
+                            <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <pattern id="circuit" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                                        <path d="M10,10 L30,10 M20,0 L20,40 M0,20 L40,20" stroke="white" stroke-width="1" fill="none"/>
+                                        <circle cx="10" cy="10" r="2" fill="white"/>
+                                        <circle cx="30" cy="10" r="2" fill="white"/>
+                                        <circle cx="10" cy="30" r="2" fill="white"/>
+                                        <circle cx="30" cy="30" r="2" fill="white"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="200" height="200" fill="url(#circuit)"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <form method="GET" action="{{ url_for('index') }}" class="row g-3">
+            <div class="col-lg-4 col-md-6 col-12">
+                {{ search_form.query(class="form-control", placeholder="Buscar produtos...") }}
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                {{ search_form.category(class="form-select") }}
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                {{ search_form.city(class="form-select") }}
+            </div>
+            <div class="col-lg-2 col-md-6 col-12">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-search"></i> <span class="d-none d-sm-inline">Buscar</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Featured Products or Search Results -->
+<section class="py-5">
+    <div class="container">
+        {% if query or category or city %}
+            <h2 class="mb-4">
+                <i class="fas fa-search"></i> Resultados da busca
+                {% if query %} - "{{ query }}"{% endif %}
+            </h2>
+            {% if products %}
+                <div class="row">
+                    {% for product in products %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                {% if product.image_data %}
+                                    <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                         class="card-img-top product-image" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ product.seller.city }}
+                                        {% if product.is_organic %}
+                                            <span class="badge bg-success ms-2">Orgânico</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="h5 text-success mb-0">{{ product.price|currency }}/{{ product.unit }}</span>
+                                            <small class="text-muted">{{ product.quantity_available }} disponível</small>
+                                        </div>
+                                        <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-outline-success w-100">
+                                            Ver Detalhes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                    <h3>Nenhum produto encontrado</h3>
+                    <p class="text-muted">Tente refinar sua busca ou explorar outras categorias.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-success">Ver Todos os Produtos</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Featured Products -->
+            <h2 class="text-center mb-5">
+                <i class="fas fa-star"></i> Produtos em Destaque
+            </h2>
+            
+            {% if recent_products %}
+                <div class="row">
+                    {% for product in recent_products %}
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                {% if product.image_data %}
+                                    <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                         class="card-img-top product-image" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="fas fa-map-marker-alt"></i> {{ product.seller.city }}
+                                        {% if product.is_organic %}
+                                            <span class="badge bg-success ms-2">Orgânico</span>
+                                        {% endif %}
+                                    </p>
+                                    <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="h5 text-success mb-0">{{ product.price|currency }}/{{ product.unit }}</span>
+                                            <small class="text-muted">{{ product.quantity_available }} disponível</small>
+                                        </div>
+                                        <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-outline-success w-100">
+                                            Ver Detalhes
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('products') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-shopping-basket"></i> Ver Todos os Produtos
+                    </a>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-seedling fa-4x text-muted mb-3"></i>
+                    <h3>Ainda não há produtos cadastrados</h3>
+                    <p class="text-muted">Seja o primeiro produtor a cadastrar seus produtos!</p>
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-success">Cadastre-se como Produtor</a>
+                    {% elif current_user.user_type == 'produtor' %}
+                        <a href="{{ url_for('add_product') }}" class="btn btn-success">Adicionar Produto</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="mb-4">Sobre o Vale do Jequitinhonha</h2>
+                <p class="lead">
+                    O Vale do Jequitinhonha é uma mesorregião do estado de Minas Gerais, 
+                    conhecida por sua rica cultura, história e potencial agrícola. 
+                    Nossa plataforma conecta produtores locais com compradores, 
+                    promovendo o desenvolvimento sustentável da região.
+                </p>
+                <div class="row mt-5">
+                    <div class="col-md-4">
+                        <div class="tech-feature-icon mb-3">
+                            <i class="fas fa-network-wired fa-3x" style="color: var(--primary-teal);"></i>
+                        </div>
+                        <h5>Conexão Digital</h5>
+                        <p>Tecnologia conectando produtores e consumidores através de uma rede inteligente.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="tech-feature-icon mb-3">
+                            <i class="fas fa-seedling fa-3x" style="color: var(--primary-teal);"></i>
+                        </div>
+                        <h5>AgriTech Sustentável</h5>
+                        <p>Inovação tecnológica promovendo práticas agrícolas sustentáveis e orgânicas.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="tech-feature-icon mb-3">
+                            <i class="fas fa-microchip fa-3x" style="color: var(--primary-teal);"></i>
+                        </div>
+                        <h5>Plataforma Inteligente</h5>
+                        <p>Sistema automatizado impulsionando a economia local através de algoritmos otimizados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Counter Animation for Impact Section
+function animateCounters() {
+    const counters = document.querySelectorAll('.counter');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        const duration = 2000; // 2 seconds
+        const step = target / (duration / 16); // 60fps
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                counter.textContent = target + (counter.textContent.includes('%') ? '%' : '+');
+                clearInterval(timer);
+            } else {
+                counter.textContent = Math.floor(current) + (counter.textContent.includes('%') ? '%' : '+');
+            }
+        }, 16);
+    });
+}
+
+// Intersection Observer for triggering animations when section is visible
+const observerOptions = {
+    threshold: 0.3,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            animateCounters();
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+// Start observing when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const impactSection = document.querySelector('.impact-section');
+    if (impactSection) {
+        observer.observe(impactSection);
+    }
+    
+    // Enhanced slogan typing effect
+    const sloganLines = document.querySelectorAll('.slogan-line-1, .slogan-line-2');
+    sloganLines.forEach((line, index) => {
+        line.style.opacity = '0';
+        setTimeout(() => {
+            line.style.animation = `slideIn${index === 0 ? 'Left' : 'Right'} 1s ease-out forwards`;
+            line.style.opacity = '1';
+        }, index * 300);
+    });
+    
+    // Progress bar animations
+    setTimeout(() => {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.transition = 'width 1.5s ease-out';
+                bar.style.width = bar.getAttribute('style').match(/width:\s*(\d+%)/)[1];
+            }, 500);
+        });
+    }, 1000);
+});
+
+// Enhanced slogan interaction
+document.addEventListener('DOMContentLoaded', function() {
+    const sloganContainer = document.querySelector('.slogan-container');
+    if (sloganContainer) {
+        sloganContainer.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+            this.style.boxShadow = '0 12px 30px rgba(255, 193, 7, 0.3)';
+        });
+        
+        sloganContainer.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '';
+        });
+    }
+});
+</script>
+{% endblock %}

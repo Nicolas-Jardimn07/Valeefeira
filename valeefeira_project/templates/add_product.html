@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if product %}Editar Produto{% else %}Adicionar Produto{% endif %} - Vale&feira
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">
+                        {% if product %}
+                            <i class="fas fa-edit"></i> Editar Produto
+                        {% else %}
+                            <i class="fas fa-plus"></i> Adicionar Novo Produto
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {{ form.category(class="form-select" + (" is-invalid" if form.category.errors else "")) }}
+                                {% if form.category.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.category.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form.price.label(class="form-label") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.price(class="form-control" + (" is-invalid" if form.price.errors else ""), step="0.01") }}
+                                    {% if form.price.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.price.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                {{ form.unit.label(class="form-label") }}
+                                {{ form.unit(class="form-select" + (" is-invalid" if form.unit.errors else "")) }}
+                                {% if form.unit.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.unit.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                {{ form.quantity_available.label(class="form-label") }}
+                                {{ form.quantity_available(class="form-control" + (" is-invalid" if form.quantity_available.errors else "")) }}
+                                {% if form.quantity_available.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.quantity_available.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                {{ form.image.label(class="form-label") }}
+                                {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else "")) }}
+                                {% if form.image.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.image.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Formatos aceitos: JPG, JPEG, PNG, GIF. Tamanho máximo: 16MB</div>
+                                
+                                {% if product and product.image_data %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Imagem atual:</small><br>
+                                        <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                             alt="{{ product.name }}" class="img-thumbnail mt-1" style="max-width: 150px;">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" name="delete_image" id="delete_image" value="1">
+                                            <label class="form-check-label text-danger" for="delete_image">
+                                                <i class="fas fa-trash"></i> Excluir imagem atual
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                {{ form.harvest_date.label(class="form-label") }}
+                                {{ form.harvest_date(class="form-control" + (" is-invalid" if form.harvest_date.errors else "")) }}
+                                {% if form.harvest_date.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.harvest_date.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Data da colheita (opcional)</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_organic(class="form-check-input") }}
+                                {{ form.is_organic.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-text">Marque se o produto é orgânico/natural</div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                {% if product %}
+                                    <i class="fas fa-save"></i> Salvar Alterações
+                                {% else %}
+                                    <i class="fas fa-plus"></i> Adicionar Produto
+                                {% endif %}
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Preview image before upload
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Create or update image preview
+                let preview = document.getElementById('image-preview');
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'image-preview';
+                    preview.className = 'img-thumbnail mt-2';
+                    preview.style.maxWidth = '200px';
+                    e.target.parentNode.appendChild(preview);
+                }
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

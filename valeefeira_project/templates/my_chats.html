@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Conversas - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Início</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Minhas Conversas</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-comments"></i> Minhas Conversas</h1>
+    </div>
+
+    {% if chat_groups %}
+        <div class="row">
+            {% for group in chat_groups %}
+                <div class="col-lg-6 col-12 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start">
+                                {% if group.product.image_data %}
+                                    <img src="{{ url_for('serve_image', product_id=group.product.id) }}" 
+                                         alt="{{ group.product.name }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-1">{{ group.product.name }}</h5>
+                                    <p class="text-muted mb-2">
+                                        Conversa com {{ group.other_user.username }}
+                                        {% if group.other_user.id == group.product.seller_id %}(Vendedor){% else %}(Comprador){% endif %}
+                                    </p>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">Última mensagem:</small>
+                                        <p class="mb-1">{{ group.latest_chat.message[:100] }}{% if group.latest_chat.message|length > 100 %}...{% endif %}</p>
+                                        <small class="text-muted">{{ group.latest_chat.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                                    </div>
+                                    
+                                    {% if group.unread_count > 0 %}
+                                        <span class="badge bg-danger">{{ group.unread_count }} não lida{% if group.unread_count > 1 %}s{% endif %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{{ url_for('chat', product_id=group.product.id, other_user_id=group.other_user.id) }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-comment"></i> Ver Conversa
+                            </a>
+                            <a href="{{ url_for('product_detail', id=group.product.id) }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-eye"></i> Ver Produto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="card">
+                <div class="card-body py-5">
+                    <i class="fas fa-comment-slash fa-4x text-muted mb-4"></i>
+                    <h3>Nenhuma conversa ainda</h3>
+                    <p class="text-muted mb-4">
+                        {% if current_user.user_type == 'produtor' %}
+                            Quando alguém se interessar pelos seus produtos, as conversas aparecerão aqui.
+                        {% else %}
+                            Inicie uma conversa sobre um produto que te interesse para começar a negociar.
+                        {% endif %}
+                    </p>
+                    <a href="{{ url_for('products') }}" class="btn btn-success">
+                        <i class="fas fa-search"></i> Explorar Produtos
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

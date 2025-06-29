@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                    <small class="text-muted">- {{ current_user.user_type.title() }}</small>
+                </h1>
+                {% if current_user.user_type == 'produtor' %}
+                    <a href="{{ url_for('add_product') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Adicionar Produto
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if current_user.user_type == 'produtor' %}
+        <!-- Producer Dashboard -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ products|length }}</h4>
+                                <p class="mb-0">Produtos</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-box fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ products|selectattr('is_active')|list|length }}</h4>
+                                <p class="mb-0">Ativos</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="text-truncate">{{ current_user.city }}</h4>
+                                <p class="mb-0">Localização</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-map-marker-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ products|selectattr('is_featured')|list|length }}</h4>
+                                <p class="mb-0">Em Destaque</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subscription Management -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-crown"></i> Plano de Assinatura
+                </h5>
+                {% if current_user.is_subscription_active() %}
+                    {% set benefits = current_user.get_plan_benefits() %}
+                    {% if benefits.badge %}
+                        <span class="badge {% if current_user.subscription_plan == 'premium' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+                            {{ benefits.badge }}
+                        </span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if current_user.is_subscription_active() %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>Plano Atual: <span class="text-success">{{ current_user.subscription_plan.title() }}</span></h6>
+                            <p class="text-muted mb-2">Válido até: {{ current_user.subscription_expires.strftime('%d/%m/%Y') }}</p>
+                            {% set benefits = current_user.get_plan_benefits() %}
+                            <p class="mb-0">
+                                <i class="fas fa-star text-warning"></i> 
+                                Produtos em destaque: {{ products|selectattr('is_featured')|list|length }}/{{ benefits.featured_products }}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{{ url_for('subscription_plans') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-upgrade"></i> Gerenciar Plano
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h6>Plano Gratuito</h6>
+                            <p class="text-muted mb-0">Upgrade para destacar seus produtos e aumentar suas vendas</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{{ url_for('subscription_plans') }}" class="btn btn-primary">
+                                <i class="fas fa-rocket"></i> Fazer Upgrade
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Products Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-box"></i> Meus Produtos
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if products %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Imagem</th>
+                                    <th>Nome</th>
+                                    <th>Categoria</th>
+                                    <th>Preço</th>
+                                    <th>Quantidade</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                    <tr>
+                                        <td>
+                                            {% if product.image_data %}
+                                                <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                                     alt="{{ product.name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>{{ product.name }}</strong>
+                                            {% if product.is_featured %}
+                                                <span class="badge bg-warning ms-1"><i class="fas fa-star"></i> Destaque</span>
+                                            {% endif %}
+                                            {% if product.is_organic %}
+                                                <span class="badge bg-success ms-1">Orgânico</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ product.category.title() }}</td>
+                                        <td>{{ product.price|currency }}/{{ product.unit }}</td>
+                                        <td>{{ product.quantity_available }}</td>
+                                        <td>
+                                            {% if product.is_active %}
+                                                <span class="badge bg-success">Ativo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inativo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('edit_product', id=product.id) }}" class="btn btn-outline-warning">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                {% if product.is_featured %}
+                                                    <a href="{{ url_for('unfeature_product', product_id=product.id) }}" class="btn btn-outline-warning"
+                                                       title="Remover destaque">
+                                                        <i class="fas fa-star-half-alt"></i>
+                                                    </a>
+                                                {% else %}
+                                                    {% if current_user.is_subscription_active() and current_user.can_feature_product() %}
+                                                        <a href="{{ url_for('feature_product', product_id=product.id) }}" class="btn btn-outline-success"
+                                                           title="Colocar em destaque">
+                                                            <i class="fas fa-star"></i>
+                                                        </a>
+                                                    {% elif current_user.is_subscription_active() %}
+                                                        <button class="btn btn-outline-secondary" disabled title="Limite de produtos em destaque atingido">
+                                                            <i class="fas fa-star"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{{ url_for('subscription_plans') }}" class="btn btn-outline-info"
+                                                           title="Fazer upgrade para destacar produtos">
+                                                            <i class="fas fa-crown"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                {% endif %}
+                                                <a href="{{ url_for('delete_product', id=product.id) }}" class="btn btn-outline-danger"
+                                                   onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-box fa-4x text-muted mb-3"></i>
+                        <h4>Nenhum produto cadastrado</h4>
+                        <p class="text-muted">Comece adicionando seus produtos para venda.</p>
+                        <a href="{{ url_for('add_product') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Adicionar Primeiro Produto
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <!-- Buyer Dashboard -->
+        <div class="row mb-4">
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4>{{ recent_products|length }}</h4>
+                                <p class="mb-0">Produtos Recentes</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-shopping-basket fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="text-truncate">{{ current_user.city }}</h4>
+                                <p class="mb-0">Sua Cidade</p>
+                            </div>
+                            <div>
+                                <i class="fas fa-map-marker-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-12 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <a href="{{ url_for('products') }}" class="text-white text-decoration-none">
+                            <i class="fas fa-search fa-2x mb-2"></i>
+                            <p class="mb-0">Explorar Produtos</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Products -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock"></i> Produtos Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_products %}
+                    <div class="row">
+                        {% for product in recent_products %}
+                            <div class="col-lg-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            {% if product.image_data %}
+                                                <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                                     class="img-fluid rounded-start h-100" style="object-fit: cover;" alt="{{ product.name }}">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                                                    <i class="fas fa-image fa-2x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <h6 class="card-title">{{ product.name }}</h6>
+                                                <p class="card-text small text-muted">
+                                                    <i class="fas fa-map-marker-alt"></i> {{ product.seller.city }}
+                                                    {% if product.is_organic %}
+                                                        <span class="badge bg-success ms-1">Orgânico</span>
+                                                    {% endif %}
+                                                </p>
+                                                <p class="card-text">
+                                                    <strong class="text-success">{{ product.price|currency }}/{{ product.unit }}</strong>
+                                                </p>
+                                                <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-sm btn-outline-success">
+                                                    Ver Detalhes
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('products') }}" class="btn btn-success">
+                            <i class="fas fa-shopping-basket"></i> Ver Todos os Produtos
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
+                        <h4>Nenhum produto disponível</h4>
+                        <p class="text-muted">Ainda não há produtos cadastrados na plataforma.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Avaliações - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-star text-warning"></i> Minhas Avaliações</h2>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    {% if reviews.items %}
+                        {% for review in reviews.items %}
+                            <div class="review-item border-bottom pb-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <!-- Product Info -->
+                                        <div class="d-flex align-items-center mb-2">
+                                            {% if review.product.image_data %}
+                                                <img src="{{ url_for('serve_image', product_id=review.product.id) }}" 
+                                                     class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;" alt="{{ review.product.name }}">
+                                            {% else %}
+                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-seedling text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-bold">
+                                                    <a href="{{ url_for('product_detail', id=review.product.id) }}" class="text-decoration-none">
+                                                        {{ review.product.name }}
+                                                    </a>
+                                                </div>
+                                                <small class="text-muted">
+                                                    Por: {{ review.product.seller.username }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <span class="text-warning me-2">{{ review.get_star_display() }}</span>
+                                                    <small class="text-muted">{{ review.created_at.strftime('%d/%m/%Y às %H:%M') }}</small>
+                                                </div>
+                                                
+                                                {% if review.title %}
+                                                    <h6 class="fw-bold mb-2">{{ review.title }}</h6>
+                                                {% endif %}
+                                                
+                                                {% if review.comment %}
+                                                    <p class="mb-0">{{ review.comment }}</p>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                                        type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" 
+                                                           href="{{ url_for('product_detail', id=review.product.id) }}">
+                                                            <i class="fas fa-eye"></i> Ver Produto
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" 
+                                                           href="{{ url_for('delete_review', review_id=review.id) }}"
+                                                           onclick="return confirm('Tem certeza que deseja excluir esta avaliação?')">
+                                                            <i class="fas fa-trash"></i> Excluir
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <!-- Pagination -->
+                        {% if reviews.pages > 1 %}
+                            <nav aria-label="Navegação das avaliações">
+                                <ul class="pagination justify-content-center">
+                                    {% if reviews.has_prev %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('my_reviews', page=reviews.prev_num) }}">
+                                                Anterior
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for page_num in reviews.iter_pages() %}
+                                        {% if page_num %}
+                                            {% if page_num != reviews.page %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ url_for('my_reviews', page=page_num) }}">
+                                                        {{ page_num }}
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ page_num }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if reviews.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('my_reviews', page=reviews.next_num) }}">
+                                                Próxima
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                            <h5>Você ainda não fez nenhuma avaliação</h5>
+                            <p class="text-muted">Compre produtos e deixe sua avaliação para ajudar outros compradores!</p>
+                            <a href="{{ url_for('products') }}" class="btn btn-success">
+                                <i class="fas fa-shopping-basket"></i> Explorar Produtos
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

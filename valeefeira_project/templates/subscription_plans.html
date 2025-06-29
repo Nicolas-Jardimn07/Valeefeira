@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Planos de Assinatura - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Início</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Planos de Assinatura</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mb-5">
+        <h1 class="display-4">Planos de Assinatura</h1>
+        <p class="lead text-muted">Aumente a visibilidade dos seus produtos e alcance mais clientes</p>
+    </div>
+
+    {% if current_user.is_subscription_active() %}
+        <div class="alert alert-success mb-4">
+            <h5><i class="fas fa-crown"></i> Você tem um plano ativo!</h5>
+            <p class="mb-0">
+                Plano atual: <strong>{{ current_user.subscription_plan.title() }}</strong> 
+                - Válido até {{ current_user.subscription_expires.strftime('%d/%m/%Y') }}
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <!-- Plano Gratuito -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 {% if current_user.subscription_plan == 'free' %}border-secondary{% endif %}">
+                <div class="card-header text-center bg-light">
+                    <h4>Gratuito</h4>
+                    <h2 class="display-4">R$ 0</h2>
+                    <small class="text-muted">Para sempre</small>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Cadastro de produtos ilimitados</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Chat com compradores</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Perfil básico</li>
+                        <li class="mb-2"><i class="fas fa-times text-muted"></i> Produtos em destaque</li>
+                        <li class="mb-2"><i class="fas fa-times text-muted"></i> Prioridade nas listagens</li>
+                        <li class="mb-2"><i class="fas fa-times text-muted"></i> Analytics avançados</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    {% if current_user.subscription_plan == 'free' %}
+                        <button class="btn btn-outline-secondary" disabled>Plano Atual</button>
+                    {% else %}
+                        <p class="text-muted">Seu plano padrão</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Plano Básico -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 {% if current_user.subscription_plan == 'basic' %}border-primary{% endif %}">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>Básico</h4>
+                    <h2 class="display-4">R$ 19</h2>
+                    <small>por mês</small>
+                    <div class="mt-2">
+                        <span class="badge bg-light text-primary">Mais Popular</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Tudo do plano gratuito</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>3 produtos em destaque</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Prioridade nas listagens</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Badge "Produtor Verificado"</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Analytics básicos</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Suporte por email</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    {% if current_user.subscription_plan == 'basic' and current_user.is_subscription_active() %}
+                        <button class="btn btn-outline-primary" disabled>Plano Ativo</button>
+                    {% else %}
+                        <div class="d-grid gap-2">
+                            <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                                <input type="hidden" name="plan" value="basic">
+                                <input type="hidden" name="payment_method" value="pix">
+                                <button type="submit" class="btn btn-primary w-100 mb-2">
+                                    <i class="fas fa-qrcode"></i> Pagar com PIX
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                                <input type="hidden" name="plan" value="basic">
+                                <input type="hidden" name="payment_method" value="card">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-credit-card"></i> Cartão de Crédito
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Plano Premium -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 {% if current_user.subscription_plan == 'premium' %}border-warning{% endif %}">
+                <div class="card-header text-center bg-warning text-dark">
+                    <h4>Premium</h4>
+                    <h2 class="display-4">R$ 39</h2>
+                    <small>por mês</small>
+                    <div class="mt-2">
+                        <span class="badge bg-dark text-warning">Máximo Destaque</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Tudo do plano básico</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> <strong>10 produtos em destaque</strong></li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Badge "Produtor Premium"</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Analytics avançados</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Destaque na página inicial</li>
+                        <li class="mb-2"><i class="fas fa-check text-success"></i> Suporte prioritário</li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    {% if current_user.subscription_plan == 'premium' and current_user.is_subscription_active() %}
+                        <button class="btn btn-outline-warning" disabled>Plano Ativo</button>
+                    {% else %}
+                        <div class="d-grid gap-2">
+                            <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                                <input type="hidden" name="plan" value="premium">
+                                <input type="hidden" name="payment_method" value="pix">
+                                <button type="submit" class="btn btn-warning text-dark w-100 mb-2">
+                                    <i class="fas fa-qrcode"></i> Pagar com PIX
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('create_checkout_session') }}">
+                                <input type="hidden" name="plan" value="premium">
+                                <input type="hidden" name="payment_method" value="card">
+                                <button type="submit" class="btn btn-outline-warning w-100">
+                                    <i class="fas fa-credit-card"></i> Cartão de Crédito
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benefícios dos Produtos em Destaque -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Por que produtos em destaque?</h3>
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-eye fa-3x text-primary mb-3"></i>
+                            <h5>Maior Visibilidade</h5>
+                            <p class="text-muted">Seus produtos aparecem primeiro nas buscas e na página inicial</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                            <h5>Mais Vendas</h5>
+                            <p class="text-muted">Aumente suas chances de venda com maior exposição</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                            <h5>Badge de Credibilidade</h5>
+                            <p class="text-muted">Transmita confiança com badges de verificação</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Garantia e Suporte -->
+    <div class="text-center mt-4">
+        <p class="text-muted">
+            <i class="fas fa-shield-alt"></i> Cancele a qualquer momento • 
+            <i class="fas fa-headset"></i> Suporte especializado • 
+            <i class="fas fa-credit-card"></i> Pagamento seguro
+        </p>
+    </div>
+</div>
+{% endblock %}

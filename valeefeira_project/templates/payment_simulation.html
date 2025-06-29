@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento Simulado - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4><i class="fas fa-credit-card"></i> Pagamento Simulado</h4>
+                    <p class="mb-0">Sistema de teste seguro - Nenhum pagamento real será processado</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Plano Selecionado</h5>
+                        <p class="mb-0">
+                            <strong>{{ plan.title() }}</strong> - 
+                            {% if plan == 'basic' %}
+                                R$ 19,00/mês
+                            {% else %}
+                                R$ 39,00/mês
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-qrcode"></i> 
+                                <strong>Prefere pagar com PIX?</strong>
+                                <p class="mb-0 small">Pagamento instantâneo e sem taxas</p>
+                            </div>
+                            <a href="{{ url_for('pix_payment', plan=plan) }}" class="btn btn-outline-primary btn-sm">
+                                Usar PIX
+                            </a>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('process_payment') }}">
+                        <input type="hidden" name="plan" value="{{ plan }}">
+                        
+                        <div class="mb-3">
+                            <label for="card_number" class="form-label">Número do Cartão (Simulação)</label>
+                            <input type="text" class="form-control" id="card_number" name="card_number" 
+                                   placeholder="4111 1111 1111 1111" maxlength="19" required>
+                            <div class="form-text">
+                                <strong>Para teste, use:</strong> 4111 1111 1111 1111 (pagamento aprovado)<br>
+                                Qualquer outro número será recusado
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="expiry" class="form-label">Validade</label>
+                                    <input type="text" class="form-control" id="expiry" name="expiry" 
+                                           placeholder="12/25" maxlength="5" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" name="cvv" 
+                                           placeholder="123" maxlength="3" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardholder_name" class="form-label">Nome no Cartão</label>
+                            <input type="text" class="form-control" id="cardholder_name" name="cardholder_name" 
+                                   placeholder="João Silva" required>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-shield-alt"></i> Sistema de Teste Seguro</h6>
+                            <small>
+                                Este é um ambiente de demonstração. Nenhum pagamento real será processado e 
+                                nenhuma informação de cartão será armazenada. Use apenas dados fictícios.
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-lock"></i> Processar Pagamento Simulado
+                            </button>
+                            <a href="{{ url_for('subscription_plans') }}" class="btn btn-outline-secondary">
+                                Voltar aos Planos
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Benefícios do Plano -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Benefícios do Plano {{ plan.title() }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if plan == 'basic' %}
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> 3 produtos em destaque</li>
+                            <li><i class="fas fa-check text-success"></i> Prioridade nas listagens</li>
+                            <li><i class="fas fa-check text-success"></i> Badge "Produtor Verificado"</li>
+                            <li><i class="fas fa-check text-success"></i> Analytics básicos</li>
+                        </ul>
+                    {% else %}
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> 10 produtos em destaque</li>
+                            <li><i class="fas fa-check text-success"></i> Badge "Produtor Premium"</li>
+                            <li><i class="fas fa-check text-success"></i> Analytics avançados</li>
+                            <li><i class="fas fa-check text-success"></i> Destaque na página inicial</li>
+                            <li><i class="fas fa-check text-success"></i> Suporte prioritário</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Format card number input
+    const cardNumberInput = document.getElementById('card_number');
+    cardNumberInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+        let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        if (formattedValue.length > 19) formattedValue = formattedValue.substr(0, 19);
+        e.target.value = formattedValue;
+    });
+
+    // Format expiry date
+    const expiryInput = document.getElementById('expiry');
+    expiryInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+
+    // CVV only numbers
+    const cvvInput = document.getElementById('cvv');
+    cvvInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+});
+</script>
+{% endblock %}

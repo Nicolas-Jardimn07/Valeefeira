@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Chat sobre {{ product.name }} - Vale&feira{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Início</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('products') }}">Produtos</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('product_detail', id=product.id) }}">{{ product.name }}</a></li>
+            <li class="breadcrumb-item active">Chat</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Product Info Header -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if product.image_data %}
+                            <img src="{{ url_for('serve_image', product_id=product.id) }}" 
+                                 alt="{{ product.name }}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ product.name }}</h5>
+                            <p class="text-muted mb-0">Conversando com {{ other_user.username }} 
+                                {% if other_user.id == product.seller_id %}(Vendedor){% else %}(Comprador){% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> Conversa</h5>
+                </div>
+                <div class="card-body" style="height: 400px; overflow-y: auto;" id="chatContainer">
+                    {% if chats %}
+                        {% for chat in chats %}
+                            <div class="mb-3 {% if chat.sender_id == current_user.id %}text-end{% endif %}">
+                                <div class="d-inline-block p-3 rounded {% if chat.sender_id == current_user.id %}bg-success text-white{% else %}bg-light{% endif %}" 
+                                     style="max-width: 75%;">
+                                    <div class="mb-1">{{ chat.message }}</div>
+                                    <small class="{% if chat.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
+                                        {% if chat.sender_id == current_user.id %}
+                                            Você
+                                        {% else %}
+                                            {{ other_user.username }}
+                                            {% if other_user.id == product.seller_id %}(Vendedor){% else %}(Comprador){% endif %}
+                                        {% endif %}
+                                        - {{ chat.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comment-dots fa-3x mb-3"></i>
+                            <p>Nenhuma mensagem ainda. Inicie a conversa!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Message Form -->
+                <div class="card-footer">
+                    <form method="POST" action="{{ url_for('chat', product_id=product.id, other_user_id=other_user.id) }}"">
+                        {{ form.hidden_tag() }}
+                        <div class="input-group">
+                            {{ form.message(class="form-control", style="border-right: none;") }}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Enviar
+                            </button>
+                        </div>
+                        {% if form.message.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in form.message.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="text-center">
+                <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Produto
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-scroll to bottom of chat
+    const chatContainer = document.getElementById('chatContainer');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    
+    // Auto-refresh chat every 30 seconds
+    setInterval(function() {
+        location.reload();
+    }, 30000);
+});
+</script>
+{% endblock %}
